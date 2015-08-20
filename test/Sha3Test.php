@@ -5,8 +5,12 @@ namespace bb\Sha3\Test;
 use PHPUnit_Framework_TestCase;
 use bb\Sha3\Sha3;
 
+
 class Sha3Test extends PHPUnit_Framework_TestCase
 {
+
+const short = "52A608AB21CCDD8A4457A57EDE782176";
+const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F5623CB66B23346775D386B50E982C493ADBBFC54B9A3CD383382336A1A0B2150A15358F336D03AE18F666C7573D55C4FD181C29E6CCFDE63EA35F0ADF5885CFC0A3D84A2B2E4DD24496DB789E663170CEF74798AA1BBCD4574EA0BBA40489D764B2F83AADC66B148B4A0CD95246C127D5871C4F11418690A5DDF01246A0C80A43C70088B6183639DCFDA4125BD113A8F49EE23ED306FAAC576C3FB0C1E256671D817FC2534A52F5B439F72E424DE376F4C565CCA82307DD9EF76DA5B7C4EB7E085172E328807C02D011FFBF33785378D79DC266F6A5BE6BB0E4A92ECEEBAEB1";
 
     public function  testSha3()
     {
@@ -32,6 +36,8 @@ class Sha3Test extends PHPUnit_Framework_TestCase
             'a80f839cd4f83f6c3dafc87feae470045e4eb0d366397d5c6ce34ba1739f734d');
 
 
+
+
         $this->assertEquals(Sha3::hash("", 224), '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7');
         $this->assertEquals(Sha3::hash("The quick brown fox jumps over the lazy dog", 224),
             'd15dadceaa4d5d7bb3b48f446421d542e08ad8887305e28d58335795');
@@ -39,9 +45,37 @@ class Sha3Test extends PHPUnit_Framework_TestCase
             '2d0708903833afabdd232a20201176e8b58c5be8a6fe74265ac54db0');
 
 
-        $msg = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F5623CB66B23346775D386B50E982C493ADBBFC54B9A3CD383382336A1A0B2150A15358F336D03AE18F666C7573D55C4FD181C29E6CCFDE63EA35F0ADF5885CFC0A3D84A2B2E4DD24496DB789E663170CEF74798AA1BBCD4574EA0BBA40489D764B2F83AADC66B148B4A0CD95246C127D5871C4F11418690A5DDF01246A0C80A43C70088B6183639DCFDA4125BD113A8F49EE23ED306FAAC576C3FB0C1E256671D817FC2534A52F5B439F72E424DE376F4C565CCA82307DD9EF76DA5B7C4EB7E085172E328807C02D011FFBF33785378D79DC266F6A5BE6BB0E4A92ECEEBAEB1";
-        $this->assertEquals(Sha3::hash(hex2bin($msg), 512),
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::short), 224),
+            'b1571bed52e54eef377d99df7be4bc6682c43387f2bf9acc92df608f');
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::long), 224),
+            '94689ea9f347dda8dd798a858605868743c6bd03a6a65c6085d52bed');
+
+
+
+
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::short), 256),
+            '2c7e7cb356fdc68ec8927e499d2a6bae2b781817919c829ebbe8225baed46967');
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::long), 256),
+            'c11f3522a8fb7b3532d80b6d40023a92b489addad93bf5d64b23f35e9663521c');
+
+
+
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::short), 384),
+            'feee2ef332515284e0ba247c62f264199044d03877c58e54b51a62e39e91c27aaae384837eb9d479b4c0308cfc6b779b');
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::long), 384),
+            '128dc611762be9b135b3739484cfaadca7481d68514f3dfd6f5d78bb1863ae68130835cdc7061a7ed964b32f1db75ee1');
+
+
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::short), 512),
+            '001618372e75147af90c0cf16c3bbdaa069ddbc62483b392d028ded49f75084a5dfcc53aecd9f57ddbb73daa041fd71089d8fb5edf6cfaf6f1e4e25ad3de266c');
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::long), 512),
             '6e8b8bd195bdd560689af2348bdc74ab7cd05ed8b9a57711e9be71e9726fda4591fee12205edacaf82ffbbaf16dff9e702a708862080166c2ff6ba379bc7ffc2');
+
+
+
+        $this->assertEquals(Sha3::hash(hex2bin(Sha3Test::long), 512),
+            '6e8b8bd195bdd560689af2348bdc74ab7cd05ed8b9a57711e9be71e9726fda4591fee12205edacaf82ffbbaf16dff9e702a708862080166c2ff6ba379bc7ffc2');
+
 
         $msg = "9F2FCC7C90DE090D6B87CD7E9718C1EA6CB21118FC2D5DE9F97E5DB6AC1E9C10";
         $this->assertEquals(Sha3::hash(hex2bin($msg), 256),
@@ -62,8 +96,11 @@ class Sha3Test extends PHPUnit_Framework_TestCase
     {
         $this->assertEquals(Sha3::shake("", 128, 256),
             '7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef26');
-        $this->assertEquals(Sha3::shake("", 256, 512),
-            '46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be');
+        $this->assertEquals(Sha3::shake(hex2bin(Sha3Test::short), 128, 256),
+            '3a0faca70c9d2b81d1064d429ea3b05ad27366f64985379ddd75bc73d6a83810');
+
+        $this->assertEquals(Sha3::shake(hex2bin(Sha3Test::long), 128, 256),
+            '14236e75b9784df4f57935f945356cbe383fe513ed30286f91060759bcb0ef4b');
 
 
         $this->assertEquals(Sha3::shake("The quick brown fox jumps over the lazy dog", 128, 256),
@@ -71,8 +108,17 @@ class Sha3Test extends PHPUnit_Framework_TestCase
         $this->assertEquals(Sha3::shake("The quick brown fox jumps over the lazy dof", 128, 256),
             '853f4538be0db9621a6cea659a06c1107b1f83f02b13d18297bd39d7411cf10c');
 
-        $this->assertEquals(Sha3::shake("", 128, 256, true),
-            hex2bin('7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef26'));
+
+
+
+        $this->assertEquals(Sha3::shake("", 256, 512),
+            '46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be');
+
+        $this->assertEquals(Sha3::shake(hex2bin(Sha3Test::short), 256, 512),
+            '57119c4507f975ad0e9ea4f1166e5f9b590bf2671aaeb41d130d2c570bafc579b0b9ec485cc736a0a848bbc886cbaa79ffcd067ce64b3b410741ab011c544225');
+
+        $this->assertEquals(Sha3::shake(hex2bin(Sha3Test::long), 256, 512),
+            '8a5199b4a7e133e264a86202720655894d48cff344a928cf8347f48379cef347dfc5bcffab99b27b1f89aa2735e23d30088ffa03b9edb02b9635470ab9f10389');
     }
 
 
