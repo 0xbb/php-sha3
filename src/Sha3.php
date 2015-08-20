@@ -160,5 +160,4 @@ class Sha3
     {
         return Sha3::keccak($in, $mdlen, $outlen, 0x1f, $raw_outptut);
     }
-
 }
