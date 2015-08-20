@@ -17,6 +17,7 @@ install:
   - travis_retry composer install --prefer-dist --dev
 
 script:
+  - mkdir -p build/
   - phpunit --coverage-text --coverage-clover=coverage.clover
 after_script:
   - php vendor/bin/coveralls -v
