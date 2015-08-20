@@ -13,8 +13,7 @@ cache:
     - $HOME/.composer/cache
 
 install:
-  - travies_retry composer install --dev
-  - travis_retry composer install --prefer-dist
+  - travis_retry composer install --prefer-dist --dev
 
 script:
   - phpunit --coverage-text --coverage-clover=coverage.clover
