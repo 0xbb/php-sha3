@@ -1,0 +1,25 @@
+{
+    "name": "bb/php-sha3",
+    "description": "Pure PHP implementation of SHA-3",
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bruno Bierbaumer",
+            "email": "bruno+github@bierbaumer.net"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "bb\\Sha3\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "bb\\Sha3\\Test\\": "test"
+        }
+    }
+}
