@@ -5,23 +5,7 @@ namespace bb\Sha3;
 class Sha3
 {
     const KECCAK_ROUNDS = 24;
-
-    private static function rotl64($x, $n)
-    {
-        $hi = $x[0];
-        $lo = $x[1];
-        if ($n >= 32) {
-            $n -= 32;
-            $hi = $x[1];
-            $lo = $x[0];
-        }
-
-        return [
-            (($hi << $n) | ($lo >> (32 - $n))) & (0xFFFFFFFF),
-            (($lo << $n) | ($hi >> (32 - $n))) & (0xFFFFFFFF)
-        ];
-    }
-
+    
     private static function swapEndianness($hex)
     {
         return implode('', array_reverse(str_split($hex, 2)));
@@ -73,7 +57,22 @@ class Sha3
                 $j = $keccakf_piln[$i];
 
                 $bc[0] = $st[$j];
-                $st[$j] = Sha3::rotl64($t, $keccakf_rotc[$i]);
+
+                $n = $keccakf_rotc[$i];
+                $hi = $t[0];
+                $lo = $t[1];
+                if ($n >= 32) {
+                    $n -= 32;
+                    $hi = $t[1];
+                    $lo = $t[0];
+                }
+
+                $st[$j] =[
+                    (($hi << $n) | ($lo >> (32 - $n))) & (0xFFFFFFFF),
+                    (($lo << $n) | ($hi >> (32 - $n))) & (0xFFFFFFFF)
+                ];
+
+
                 $t = $bc[0];
             }
 
