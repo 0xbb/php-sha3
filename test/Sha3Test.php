@@ -50,14 +50,20 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
 
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
-                $this->assertEquals(Sha3::hash($testcase[0], $bitsize), $testcase[1]);
+                $this->assertEquals(Sha3::hash32($testcase[0], $bitsize), $testcase[1]);
+            }
+        }
+
+        foreach($v as $bitsize => $vectors){
+            foreach($vectors as $testcase){
+                $this->assertEquals(Sha3::hash64($testcase[0], $bitsize), $testcase[1]);
             }
         }
     }
 
     public function  testShake()
     {
-        $v = [
+       $v = [
             128 => [
                 [256, '', '7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef26'],
                 [256, hex2bin(Sha3Test::short), '3a0faca70c9d2b81d1064d429ea3b05ad27366f64985379ddd75bc73d6a83810'],
@@ -74,7 +80,13 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
 
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
-                $this->assertEquals(Sha3::shake($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+                $this->assertEquals(Sha3::shake32($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+            }
+        }
+
+        foreach($v as $bitsize => $vectors){
+            foreach($vectors as $testcase){
+                $this->assertEquals(Sha3::shake64($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
             }
         }
     }
