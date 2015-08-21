@@ -2,8 +2,6 @@
 
 namespace bb\Sha3;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
-
 class Sha3
 {
     const KECCAK_ROUNDS = 24;
@@ -311,7 +309,6 @@ class Sha3
         return Sha3::hash32($in, $mdlen, $raw_output);
     }
 
-
     public static function shake($in, $mdlen,$outlen, $raw_output = false)
     {
         if(Sha3::$use_64_bit){
@@ -320,22 +317,22 @@ class Sha3
         return Sha3::shake32($in, $mdlen,$outlen, $raw_output);
     }
 
-    public static function hash64($in, $mdlen, $raw_output = false)
+    private static function hash64($in, $mdlen, $raw_output = false)
     {
         return Sha3::keccak64($in, $mdlen, $mdlen, 0x06, $raw_output);
     }
 
-    public static function shake64($in, $mdlen, $outlen, $raw_outptut = false)
+    private static function shake64($in, $mdlen, $outlen, $raw_outptut = false)
     {
         return Sha3::keccak64($in, $mdlen, $outlen, 0x1f, $raw_outptut);
     }
 
-    public static function hash32($in, $mdlen, $raw_output = false)
+    private static function hash32($in, $mdlen, $raw_output = false)
     {
         return Sha3::keccak($in, $mdlen, $mdlen, 0x06, $raw_output);
     }
 
-    public static function shake32($in, $mdlen, $outlen, $raw_outptut = false)
+    private static function shake32($in, $mdlen, $outlen, $raw_outptut = false)
     {
         return Sha3::keccak($in, $mdlen, $outlen, 0x1f, $raw_outptut);
     }

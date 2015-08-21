@@ -48,15 +48,18 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
 
         ];
 
-        foreach($v as $bitsize => $vectors){
-            foreach($vectors as $testcase){
-                $this->assertEquals(Sha3::hash32($testcase[0], $bitsize), $testcase[1]);
-            }
-        }
+        $class = new \ReflectionClass('\bb\Sha3\Sha3');
+        $hash32 = $class->getMethod('hash32');
+        $hash32->setAccessible(true);
+        $hash64 = $class->getMethod('hash64');
+        $hash64->setAccessible(true);
+
 
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
-                $this->assertEquals(Sha3::hash64($testcase[0], $bitsize), $testcase[1]);
+                $this->assertEquals(Sha3::hash($testcase[0], $bitsize), $testcase[1]);
+                $this->assertEquals($hash32->invoke(null,$testcase[0], $bitsize), $testcase[1]);
+                $this->assertEquals($hash64->invoke(null,$testcase[0], $bitsize), $testcase[1]);
             }
         }
     }
@@ -78,15 +81,23 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
             ]
         ];
 
+        $class = new \ReflectionClass('\bb\Sha3\Sha3');
+        $shake32 = $class->getMethod('shake32');
+        $shake32->setAccessible(true);
+        $shake64 = $class->getMethod('shake64');
+        $shake64->setAccessible(true);
+
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
-                $this->assertEquals(Sha3::shake32($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+                $this->assertEquals(Sha3::shake($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+                $this->assertEquals($shake32->invoke(null,$testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+                $this->assertEquals($shake64->invoke(null,$testcase[1], $bitsize, $testcase[0]), $testcase[2]);
             }
         }
 
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
-                $this->assertEquals(Sha3::shake64($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+
             }
         }
     }
