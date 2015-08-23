@@ -4,6 +4,7 @@ namespace bb\Sha3\Test;
 
 use PHPUnit_Framework_TestCase;
 use bb\Sha3\Sha3;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 
 class Sha3Test extends PHPUnit_Framework_TestCase
@@ -48,23 +49,26 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
 
         ];
 
-        $class = new \ReflectionClass('\bb\Sha3\Sha3');
-        $hash32 = $class->getMethod('hash32');
-        $hash32->setAccessible(true);
-        $hash64 = $class->getMethod('hash64');
-        $hash64->setAccessible(true);
-
-
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
                 $this->assertEquals(Sha3::hash($testcase[0], $bitsize), $testcase[1]);
-                $this->assertEquals($hash32->invoke(null,$testcase[0], $bitsize), $testcase[1]);
-                $this->assertEquals($hash64->invoke(null,$testcase[0], $bitsize), $testcase[1]);
+
+                $this->assertEquals(Sha3::hash($testcase[0], $bitsize, true), hex2bin($testcase[1]));
+
+                $class = new \ReflectionClass('\bb\Sha3\Sha3');
+                $p = $class->getProperty('test_state');
+                $p->setAccessible(true);
+
+                $p->setValue(1);
+                $this->assertEquals(Sha3::hash($testcase[0], $bitsize), $testcase[1]);
+
+                $p->setValue(2);
+                $this->assertEquals(Sha3::hash($testcase[0], $bitsize), $testcase[1]);
             }
         }
     }
 
-    public function  testShake()
+    public function testShake()
     {
        $v = [
             128 => [
@@ -81,18 +85,67 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
             ]
         ];
 
-        $class = new \ReflectionClass('\bb\Sha3\Sha3');
-        $shake32 = $class->getMethod('shake32');
-        $shake32->setAccessible(true);
-        $shake64 = $class->getMethod('shake64');
-        $shake64->setAccessible(true);
-
         foreach($v as $bitsize => $vectors){
             foreach($vectors as $testcase){
                 $this->assertEquals(Sha3::shake($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
-                $this->assertEquals($shake32->invoke(null,$testcase[1], $bitsize, $testcase[0]), $testcase[2]);
-                $this->assertEquals($shake64->invoke(null,$testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+
+                $this->assertEquals(Sha3::shake($testcase[1], $bitsize, $testcase[0], true), hex2bin($testcase[2]));
+
+                $class = new \ReflectionClass('\bb\Sha3\Sha3');
+                $p = $class->getProperty('test_state');
+                $p->setAccessible(true);
+
+                $p->setValue(1);
+                $this->assertEquals(Sha3::shake($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
+
+                $p->setValue(2);
+                $this->assertEquals(Sha3::shake($testcase[1], $bitsize, $testcase[0]), $testcase[2]);
             }
         }
     }
+
+    public function testSelfTestException()
+    {
+        //reset test_state
+        $class = new \ReflectionClass('\bb\Sha3\Sha3');
+        $p = $class->getProperty('test_state');
+        $p->setAccessible(true);
+        $p->setValue(0);
+
+
+        //break test
+        $p = $class->getProperty('keccakf_rotc');
+        $p->setAccessible(true);
+        $p->setValue([2, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44]);
+
+
+        try  {
+            Sha3::hash('',224);
+        }
+        catch (\Exception $e){
+            $this->assertEquals($e->getMessage(), 'Sha3 self test failed!');
+
+            //correct test
+            $p->setValue([1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44]);
+            return;
+        }
+
+        //correct test
+        $p->setValue([1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44]);
+        $this->assertTrue(false);
+
+    }
+
+    public function testSelfTestPreviousFailure()
+    {
+        //reset test_state
+        $class = new \ReflectionClass('\bb\Sha3\Sha3');
+        $p = $class->getProperty('test_state');
+        $p->setAccessible(true);
+        $p->setValue(3);
+
+        $this->setExpectedException('Exception', 'Sha3 previous self test failed!');
+        Sha3::hash('',224);
+    }
+
 }

@@ -142,7 +142,7 @@ class Sha3
         return $raw_output ? $r : bin2hex($r);
     }
 
-    private static function keccakf(&$st, $rounds)
+    private static function keccakf32(&$st, $rounds)
     {
         $keccakf_rndc = [
             [0x0000, 0x0000, 0x0000, 0x0001], [0x0000, 0x0000, 0x0000, 0x8082], [0x8000, 0x0000, 0x0000, 0x0808a], [0x8000, 0x0000, 0x8000, 0x8000],
@@ -229,7 +229,7 @@ class Sha3
         }
     }
 
-    private static function keccak($in_raw, $capacity, $outputlength, $suffix, $raw_output)
+    private static function keccak32($in_raw, $capacity, $outputlength, $suffix, $raw_output)
     {
         $capacity /= 8;
 
@@ -255,7 +255,7 @@ class Sha3
                 ];
             }
 
-            Sha3::keccakf($st, Sha3::KECCAK_ROUNDS);
+            Sha3::keccakf32($st, Sha3::KECCAK_ROUNDS);
         }
 
         $temp = substr($in_raw, $in_t, $inlen);
@@ -265,7 +265,7 @@ class Sha3
         $temp[$rsiz - 1] = chr($temp[$rsiz - 1] | 0x80);
 
         for ($i = 0; $i < $rsizw; $i++) {
-            $t = (unpack('v*', substr($temp, $i * 8, 8)));
+            $t = unpack('v*', substr($temp, $i * 8, 8));
 
             $st[$i] = [
                 $st[$i][0] ^ $t[4],
@@ -275,8 +275,7 @@ class Sha3
             ];
         }
 
-        Sha3::keccakf($st, Sha3::KECCAK_ROUNDS);
-
+        Sha3::keccakf32($st, Sha3::KECCAK_ROUNDS);
 
         $out = '';
         for ($i = 0; $i < 25; $i++) {
@@ -287,55 +286,52 @@ class Sha3
         return $raw_output ? $r: bin2hex($r);
     }
 
+    // 0 = not run, 1 = 64 bit passed, 2 = 32 bit passed, 3 = failed
+    private static $test_state = 0;
+    private static function selfTest()
+    {
+        if(Sha3::$test_state === 1 || Sha3::$test_state === 2){
+            return;
+        }
+
+        if(Sha3::$test_state === 3){
+            throw new \Exception('Sha3 previous self test failed!');
+        }
+
+        $in = '';
+        $md = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7';
+        if(Sha3::keccak64($in, 224, 224, 0x06, false) === $md){
+            Sha3::$test_state = 1;
+            return;
+        }
+
+        if(Sha3::keccak32($in, 224, 224, 0x06, false) === $md){
+            Sha3::$test_state = 2;
+            return;
+        }
+
+        $test_state = 3;
+        throw new \Exception('Sha3 self test failed!');
+    }
+
+    private static function keccak($in_raw, $capacity, $outputlength, $suffix, $raw_output)
+    {
+        Sha3::selfTest();
+
+        if(Sha3::$test_state === 1){
+            return Sha3::keccak64($in_raw, $capacity, $outputlength, $suffix, $raw_output);
+        }
+
+        return Sha3::keccak32($in_raw, $capacity, $outputlength, $suffix, $raw_output);
+    }
+
     public static function hash($in, $mdlen, $raw_output = false)
-    {
-        if(Sha3::$use_64_bit){
-            return Sha3::hash64($in, $mdlen, $raw_output);
-        }
-        return Sha3::hash32($in, $mdlen, $raw_output);
-    }
-
-    public static function shake($in, $mdlen,$outlen, $raw_output = false)
-    {
-        if(Sha3::$use_64_bit){
-            return Sha3::shake64($in, $mdlen, $outlen, $raw_output);
-        }
-        return Sha3::shake32($in, $mdlen, $outlen, $raw_output);
-    }
-
-    private static function hash64($in, $mdlen, $raw_output = false)
-    {
-        return Sha3::keccak64($in, $mdlen, $mdlen, 0x06, $raw_output);
-    }
-
-    private static function shake64($in, $mdlen, $outlen, $raw_outptut = false)
-    {
-        return Sha3::keccak64($in, $mdlen, $outlen, 0x1f, $raw_outptut);
-    }
-
-    private static function hash32($in, $mdlen, $raw_output = false)
     {
         return Sha3::keccak($in, $mdlen, $mdlen, 0x06, $raw_output);
     }
 
-    private static function shake32($in, $mdlen, $outlen, $raw_outptut = false)
+    public static function shake($in, $mdlen,$outlen, $raw_output = false)
     {
-        return Sha3::keccak($in, $mdlen, $outlen, 0x1f, $raw_outptut);
-    }
-
-    private static $use_64_bit;
-    public static function init()
-    {
-        $in = '';
-        $md = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7';
-        Sha3::$use_64_bit = Sha3::hash64($in, 224) === $md;
-
-        if(! Sha3::$use_64_bit){
-            if(Sha3::hash32($in, 224) != $md){
-                throw new Exception('Sha3 self test failed!');
-            }
-        }
+        return Sha3::keccak($in, $mdlen, $outlen, 0x1f, $raw_output);
     }
 }
-
-Sha3::init();
