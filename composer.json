@@ -1,7 +1,7 @@
 {
     "name": "bb/php-sha3",
     "description": "Pure PHP implementation of SHA-3",
-    "keywords": ["sha3", "sha-3", "shake"]
+    "keywords": ["sha3", "sha-3", "shake"],
     "require-dev": {
         "phpunit/phpunit": "^4.8",
         "satooshi/php-coveralls": "dev-master"
