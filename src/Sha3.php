@@ -2,7 +2,7 @@
 
 namespace bb\Sha3;
 
-class Sha3
+final class Sha3
 {
     const KECCAK_ROUNDS = 24;
     private static $keccakf_rotc = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44];
@@ -47,11 +47,11 @@ class Sha3
             // Rho Pi
             $t = $st[1];
             for ($i = 0; $i < 24; $i++) {
-                $j = Sha3::$keccakf_piln[$i];
+                $j = self::$keccakf_piln[$i];
 
                 $bc[0] = $st[$j];
 
-                $n = Sha3::$keccakf_rotc[$i];
+                $n = self::$keccakf_rotc[$i];
                 $hi = $t[0];
                 $lo = $t[1];
                 if ($n >= 32) {
@@ -93,7 +93,7 @@ class Sha3
     {
         $capacity /= 8;
 
-        $inlen = strlen($in_raw);
+        $inlen = self::ourStrlen($in_raw);
 
         $rsiz = 200 - 2 * $capacity;
         $rsizw = $rsiz / 8;
@@ -105,7 +105,7 @@ class Sha3
 
         for ($in_t = 0; $inlen >= $rsiz; $inlen -= $rsiz, $in_t += $rsiz) {
             for ($i = 0; $i < $rsizw; $i++) {
-                $t = unpack('V*', substr($in_raw, $i * 8 + $in_t, 8));
+                $t = unpack('V*', self::ourSubstr($in_raw, $i * 8 + $in_t, 8));
 
                 $st[$i] = [
                     $st[$i][0] ^ $t[2],
@@ -113,17 +113,17 @@ class Sha3
                 ];
             }
 
-            Sha3::keccakf64($st, Sha3::KECCAK_ROUNDS);
+            self::keccakf64($st, self::KECCAK_ROUNDS);
         }
 
-        $temp = substr($in_raw, $in_t, $inlen);
+        $temp = self::ourSubstr($in_raw, $in_t, $inlen);
         $temp = str_pad($temp, $rsiz, "\x0", STR_PAD_RIGHT);
 
         $temp[$inlen] = chr($suffix);
         $temp[$rsiz - 1] = chr($temp[$rsiz - 1] | 0x80);
 
         for ($i = 0; $i < $rsizw; $i++) {
-            $t = unpack('V*', substr($temp, $i * 8, 8));
+            $t = unpack('V*', self::ourSubstr($temp, $i * 8, 8));
 
             $st[$i] = [
                 $st[$i][0] ^ $t[2],
@@ -131,13 +131,13 @@ class Sha3
             ];
         }
 
-        Sha3::keccakf64($st, Sha3::KECCAK_ROUNDS);
+        self::keccakf64($st, self::KECCAK_ROUNDS);
 
         $out = '';
         for ($i = 0; $i < 25; $i++) {
             $out .= $t = pack('V*', $st[$i][1], $st[$i][0]);
         }
-        $r = substr($out, 0, $outputlength / 8);
+        $r = self::ourSubstr($out, 0, $outputlength / 8);
 
         return $raw_output ? $r : bin2hex($r);
     }
@@ -187,12 +187,12 @@ class Sha3
             // Rho Pi
             $t = $st[1];
             for ($i = 0; $i < 24; $i++) {
-                $j = Sha3::$keccakf_piln[$i];
+                $j = self::$keccakf_piln[$i];
                 $bc[0] = $st[$j];
 
 
-                $n = Sha3::$keccakf_rotc[$i] >> 4;
-                $m = Sha3::$keccakf_rotc[$i] % 16;
+                $n = self::$keccakf_rotc[$i] >> 4;
+                $m = self::$keccakf_rotc[$i] % 16;
 
                 $st[$j] =  [
                     ((($t[(0+$n) %4] << $m) | ($t[(1+$n) %4] >> (16-$m))) & (0xFFFF)),
@@ -233,7 +233,7 @@ class Sha3
     {
         $capacity /= 8;
 
-        $inlen = strlen($in_raw);
+        $inlen = self::ourStrlen($in_raw);
 
         $rsiz = 200 - 2 * $capacity;
         $rsizw = $rsiz / 8;
@@ -245,7 +245,7 @@ class Sha3
 
         for ($in_t = 0; $inlen >= $rsiz; $inlen -= $rsiz, $in_t += $rsiz) {
             for ($i = 0; $i < $rsizw; $i++) {
-                $t = unpack('v*', substr($in_raw, $i * 8 + $in_t, 8));
+                $t = unpack('v*', self::ourSubstr($in_raw, $i * 8 + $in_t, 8));
 
                 $st[$i] = [
                     $st[$i][0] ^ $t[4],
@@ -255,17 +255,17 @@ class Sha3
                 ];
             }
 
-            Sha3::keccakf32($st, Sha3::KECCAK_ROUNDS);
+            self::keccakf32($st, self::KECCAK_ROUNDS);
         }
 
-        $temp = substr($in_raw, $in_t, $inlen);
+        $temp = self::ourSubstr($in_raw, $in_t, $inlen);
         $temp = str_pad($temp, $rsiz, "\x0", STR_PAD_RIGHT);
 
         $temp[$inlen] = chr($suffix);
         $temp[$rsiz - 1] = chr($temp[$rsiz - 1] | 0x80);
 
         for ($i = 0; $i < $rsizw; $i++) {
-            $t = unpack('v*', substr($temp, $i * 8, 8));
+            $t = unpack('v*', self::ourSubstr($temp, $i * 8, 8));
 
             $st[$i] = [
                 $st[$i][0] ^ $t[4],
@@ -275,13 +275,13 @@ class Sha3
             ];
         }
 
-        Sha3::keccakf32($st, Sha3::KECCAK_ROUNDS);
+        self::keccakf32($st, self::KECCAK_ROUNDS);
 
         $out = '';
         for ($i = 0; $i < 25; $i++) {
             $out .= $t = pack('v*', $st[$i][3],$st[$i][2], $st[$i][1], $st[$i][0]);
         }
-        $r = substr($out, 0, $outputlength / 8);
+        $r = self::ourSubstr($out, 0, $outputlength / 8);
 
         return $raw_output ? $r: bin2hex($r);
     }
@@ -290,48 +290,101 @@ class Sha3
     private static $test_state = 0;
     private static function selfTest()
     {
-        if(Sha3::$test_state === 1 || Sha3::$test_state === 2){
+        if(self::$test_state === 1 || self::$test_state === 2){
             return;
         }
 
-        if(Sha3::$test_state === 3){
+        if(self::$test_state === 3){
             throw new \Exception('Sha3 previous self test failed!');
         }
 
         $in = '';
         $md = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7';
-        if(Sha3::keccak64($in, 224, 224, 0x06, false) === $md){
-            Sha3::$test_state = 1;
+        if(self::keccak64($in, 224, 224, 0x06, false) === $md){
+            self::$test_state = 1;
             return;
         }
 
-        if(Sha3::keccak32($in, 224, 224, 0x06, false) === $md){
-            Sha3::$test_state = 2;
+        if(self::keccak32($in, 224, 224, 0x06, false) === $md){
+            self::$test_state = 2;
             return;
         }
 
-        $test_state = 3;
+        self::$test_state = 3;
         throw new \Exception('Sha3 self test failed!');
     }
 
     private static function keccak($in_raw, $capacity, $outputlength, $suffix, $raw_output)
     {
-        Sha3::selfTest();
+        self::selfTest();
 
-        if(Sha3::$test_state === 1){
-            return Sha3::keccak64($in_raw, $capacity, $outputlength, $suffix, $raw_output);
+        if(self::$test_state === 1) {
+            return self::keccak64($in_raw, $capacity, $outputlength, $suffix, $raw_output);
         }
 
-        return Sha3::keccak32($in_raw, $capacity, $outputlength, $suffix, $raw_output);
+        return self::keccak32($in_raw, $capacity, $outputlength, $suffix, $raw_output);
     }
 
     public static function hash($in, $mdlen, $raw_output = false)
     {
-        return Sha3::keccak($in, $mdlen, $mdlen, 0x06, $raw_output);
+        return self::keccak($in, $mdlen, $mdlen, 0x06, $raw_output);
     }
 
     public static function shake($in, $mdlen,$outlen, $raw_output = false)
     {
-        return Sha3::keccak($in, $mdlen, $outlen, 0x1f, $raw_output);
+        return self::keccak($in, $mdlen, $outlen, 0x1f, $raw_output);
+    }
+
+    /**
+     *  Multi-byte-safe string functions borrowed from https://github.com/sarciszewski/php-future
+     */
+
+    /**
+     * Multi-byte-safe string length calculation
+     *
+     * @param string $str
+     * @return int
+     */
+    private static function ourStrlen($str)
+    {
+        // Premature optimization: cache the function_exists() result
+        static $exists = null;
+        if ($exists === null) {
+            $exists = \function_exists('\\mb_strlen');
+        }
+        // If it exists, we need to make sure we're using 8bit mode
+        if ($exists) {
+            $length =  \mb_strlen($str, '8bit');
+            if ($length === false) {
+                throw new \Exception('mb_strlen() failed.');
+            }
+            return $length;
+        }
+
+        return \strlen($str);
+    }
+
+    /**
+     * Multi-byte-safe substring calculation
+     *
+     * @param string $str
+     * @param int $start
+     * @param int $length (optional)
+     * @return string
+     */
+    private static function ourSubstr($str, $start = 0, $length = null)
+    {
+        // Premature optimization: cache the function_exists() result
+        static $exists = null;
+        if ($exists === null) {
+            $exists = \function_exists('\\mb_substr');
+        }
+        // If it exists, we need to make sure we're using 8bit mode
+        if ($exists) {
+            return \mb_substr($str, $start, $length, '8bit');
+        } elseif ($length !== null) {
+            return \substr($str, $start, $length);
+        }
+        return \substr($str, $start);
     }
 }
