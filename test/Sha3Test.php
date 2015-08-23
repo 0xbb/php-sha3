@@ -94,11 +94,5 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
                 $this->assertEquals($shake64->invoke(null,$testcase[1], $bitsize, $testcase[0]), $testcase[2]);
             }
         }
-
-        foreach($v as $bitsize => $vectors){
-            foreach($vectors as $testcase){
-
-            }
-        }
     }
 }

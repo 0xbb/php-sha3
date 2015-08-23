@@ -8,12 +8,7 @@ class Sha3
     private static $keccakf_rotc = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44];
     private static $keccakf_piln = [10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12,2, 20, 14, 22, 9, 6, 1];
 
-    private static function swapEndianness($hex)
-    {
-        return implode('', array_reverse(str_split($hex, 2)));
-    }
-
-    private static function  keccakf64(&$st, $rounds)
+    private static function keccakf64(&$st, $rounds)
     {
         $keccakf_rndc = [
             [0x00000000, 0x00000001], [0x00000000, 0x00008082], [0x80000000, 0x0000808a], [0x80000000, 0x80008000],
@@ -128,7 +123,7 @@ class Sha3
         $temp[$rsiz - 1] = chr($temp[$rsiz - 1] | 0x80);
 
         for ($i = 0; $i < $rsizw; $i++) {
-            $t = (unpack('V*', substr($temp, $i * 8, 8)));
+            $t = unpack('V*', substr($temp, $i * 8, 8));
 
             $st[$i] = [
                 $st[$i][0] ^ $t[2],
@@ -140,14 +135,14 @@ class Sha3
 
         $out = '';
         for ($i = 0; $i < 25; $i++) {
-            $out .= Sha3::swapEndianness(sprintf("%08x%08x", $st[$i][0], $st[$i][1]));
+            $out .= $t = pack('V*', $st[$i][1], $st[$i][0]);
         }
-        $r = substr($out, 0, $outputlength / 4);
+        $r = substr($out, 0, $outputlength / 8);
 
-        return $raw_output ? hex2bin($r): $r;
+        return $raw_output ? $r : bin2hex($r);
     }
 
-    private static function  keccakf(&$st, $rounds)
+    private static function keccakf(&$st, $rounds)
     {
         $keccakf_rndc = [
             [0x0000, 0x0000, 0x0000, 0x0001], [0x0000, 0x0000, 0x0000, 0x8082], [0x8000, 0x0000, 0x0000, 0x0808a], [0x8000, 0x0000, 0x8000, 0x8000],
@@ -171,13 +166,12 @@ class Sha3
                 ];
             }
 
-
             for ($i = 0; $i < 5; $i++) {
                 $t = [
                     $bc[($i + 4) % 5][0] ^ ((($bc[($i + 1) % 5][0] << 1) | ($bc[($i + 1) % 5][1] >> 15)) & (0xFFFF)),
                     $bc[($i + 4) % 5][1] ^ ((($bc[($i + 1) % 5][1] << 1) | ($bc[($i + 1) % 5][2] >> 15)) & (0xFFFF)),
                     $bc[($i + 4) % 5][2] ^ ((($bc[($i + 1) % 5][2] << 1) | ($bc[($i + 1) % 5][3] >> 15)) & (0xFFFF)),
-                    $bc[($i + 4) % 5][3] ^ ((($bc[($i + 1) % 5][3] << 1) | ($bc[($i + 1) % 5][0] >> 15)) & (0xFFFF)),
+                    $bc[($i + 4) % 5][3] ^ ((($bc[($i + 1) % 5][3] << 1) | ($bc[($i + 1) % 5][0] >> 15)) & (0xFFFF))
                 ];
 
                 for ($j = 0; $j < 25; $j += 5) {
@@ -185,12 +179,10 @@ class Sha3
                         $st[$j + $i][0] ^ $t[0],
                         $st[$j + $i][1] ^ $t[1],
                         $st[$j + $i][2] ^ $t[2],
-                        $st[$j + $i][3] ^ $t[3],
+                        $st[$j + $i][3] ^ $t[3]
                     ];
                 }
             }
-
-
 
             // Rho Pi
             $t = $st[1];
@@ -199,8 +191,8 @@ class Sha3
                 $bc[0] = $st[$j];
 
 
-                $n = Sha3::$keccakf_rotc[$i]>>4;
-                $m = Sha3::$keccakf_rotc[$i]%16;
+                $n = Sha3::$keccakf_rotc[$i] >> 4;
+                $m = Sha3::$keccakf_rotc[$i] % 16;
 
                 $st[$j] =  [
                     ((($t[(0+$n) %4] << $m) | ($t[(1+$n) %4] >> (16-$m))) & (0xFFFF)),
@@ -212,7 +204,6 @@ class Sha3
                 $t = $bc[0];
             }
 
-
             //  Chi
             for ($j = 0; $j < 25; $j += 5) {
                 for ($i = 0; $i < 5; $i++) {
@@ -223,21 +214,18 @@ class Sha3
                         $st[$j + $i][0] ^ ~$bc[($i + 1) % 5][0] & $bc[($i + 2) % 5][0],
                         $st[$j + $i][1] ^ ~$bc[($i + 1) % 5][1] & $bc[($i + 2) % 5][1],
                         $st[$j + $i][2] ^ ~$bc[($i + 1) % 5][2] & $bc[($i + 2) % 5][2],
-                        $st[$j + $i][3] ^ ~$bc[($i + 1) % 5][3] & $bc[($i + 2) % 5][3],
+                        $st[$j + $i][3] ^ ~$bc[($i + 1) % 5][3] & $bc[($i + 2) % 5][3]
                     ];
                 }
             }
 
-            //
             // Iota
             $st[0] = [
                 $st[0][0] ^ $keccakf_rndc[$round][0],
                 $st[0][1] ^ $keccakf_rndc[$round][1],
                 $st[0][2] ^ $keccakf_rndc[$round][2],
-                $st[0][3] ^ $keccakf_rndc[$round][3],
+                $st[0][3] ^ $keccakf_rndc[$round][3]
             ];
-
-
         }
     }
 
@@ -292,14 +280,12 @@ class Sha3
 
         $out = '';
         for ($i = 0; $i < 25; $i++) {
-            $out .= Sha3::swapEndianness(sprintf("%04x%04x%04x%04x", $st[$i][0], $st[$i][1], $st[$i][2], $st[$i][3]));
+            $out .= $t = pack('v*', $st[$i][3],$st[$i][2], $st[$i][1], $st[$i][0]);
         }
-        $r = substr($out, 0, $outputlength / 4);
+        $r = substr($out, 0, $outputlength / 8);
 
-        return $raw_output ? hex2bin($r): $r;
+        return $raw_output ? $r: bin2hex($r);
     }
-
-
 
     public static function hash($in, $mdlen, $raw_output = false)
     {
@@ -312,9 +298,9 @@ class Sha3
     public static function shake($in, $mdlen,$outlen, $raw_output = false)
     {
         if(Sha3::$use_64_bit){
-            return Sha3::shake64($in, $mdlen,$outlen,  $raw_output);
+            return Sha3::shake64($in, $mdlen, $outlen, $raw_output);
         }
-        return Sha3::shake32($in, $mdlen,$outlen, $raw_output);
+        return Sha3::shake32($in, $mdlen, $outlen, $raw_output);
     }
 
     private static function hash64($in, $mdlen, $raw_output = false)
@@ -337,9 +323,8 @@ class Sha3
         return Sha3::keccak($in, $mdlen, $outlen, 0x1f, $raw_outptut);
     }
 
-
     private static $use_64_bit;
-    public static  function init()
+    public static function init()
     {
         $in = '';
         $md = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7';
@@ -352,4 +337,5 @@ class Sha3
         }
     }
 }
+
 Sha3::init();
