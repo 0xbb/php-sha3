@@ -125,6 +125,11 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
         catch (\Exception $e){
             $this->assertEquals($e->getMessage(), 'Sha3 self test failed!');
 
+            $p = $class->getProperty('test_state');
+            $p->setAccessible(true);
+
+            $this->assertEquals($p->getValue(), 3);
+
             //correct test
             $p->setValue([1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44]);
             return;
