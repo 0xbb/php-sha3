@@ -10,7 +10,7 @@
     "authors": [
         {
             "name": "Bruno Bierbaumer",
-            "email": "bruno+github@bierbaumer.net"
+            "homepage": "https://github.com/0xbb/php-sha3"
         }
     ],
     "require": {
