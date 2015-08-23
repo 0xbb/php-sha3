@@ -5,6 +5,8 @@ Pure PHP implementation of SHA-3
 ## Usage
 
 ```php
+<?php 
+
 use bb\Sha3\Sha3;
 
 Sha3::hash('', 224);
