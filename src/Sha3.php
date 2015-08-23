@@ -324,15 +324,23 @@ final class Sha3
 
         return self::keccak32($in_raw, $capacity, $outputlength, $suffix, $raw_output);
     }
-    
+
     public static function hash($in, $mdlen, $raw_output = false)
     {
+        if( ! in_array($mdlen, [224, 256, 384, 512], true)) {
+            throw new \Exception('Unsupported Sha3 Hash output size.');
+        }
+
         return self::keccak($in, $mdlen, $mdlen, 0x06, $raw_output);
     }
 
-    public static function shake($in, $mdlen, $outlen, $raw_output = false)
+    public static function shake($in, $security_level, $outlen, $raw_output = false)
     {
-        return self::keccak($in, $mdlen, $outlen, 0x1f, $raw_output);
+        if( ! in_array($security_level, [128, 256], true)) {
+            throw new \Exception('Unsupported Sha3 Shake security level.');
+        }
+
+        return self::keccak($in, $security_level, $outlen, 0x1f, $raw_output);
     }
 
     /**

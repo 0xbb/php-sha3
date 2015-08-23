@@ -153,4 +153,16 @@ const long = "3A3A819C48EFDE2AD914FBF00E18AB6BC4F14513AB27D0C178A188B61431E7F562
         Sha3::hash('',224);
     }
 
+
+    public function testUnsupportedHashOutputSize()
+    {
+        $this->setExpectedException('Exception', 'Unsupported Sha3 Hash output size.');
+        Sha3::hash('',225);
+    }
+
+    public function testUnsupportedShakeSecurityLevel()
+    {
+        $this->setExpectedException('Exception', 'Unsupported Sha3 Shake security level.');
+        Sha3::shake('',129, 256);
+    }
 }
