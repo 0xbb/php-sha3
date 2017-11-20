@@ -120,7 +120,7 @@ final class Sha3
         $temp = str_pad($temp, $rsiz, "\x0", STR_PAD_RIGHT);
 
         $temp[$inlen] = chr($suffix);
-        $temp[$rsiz - 1] = chr($temp[$rsiz - 1] | 0x80);
+        $temp[$rsiz - 1] = chr((int) $temp[$rsiz - 1] | (int) 0x80);
 
         for ($i = 0; $i < $rsizw; $i++) {
             $t = unpack('V*', self::ourSubstr($temp, $i * 8, 8));
@@ -262,7 +262,7 @@ final class Sha3
         $temp = str_pad($temp, $rsiz, "\x0", STR_PAD_RIGHT);
 
         $temp[$inlen] = chr($suffix);
-        $temp[$rsiz - 1] = chr($temp[$rsiz - 1] | 0x80);
+        $temp[$rsiz - 1] = chr((int) $temp[$rsiz - 1] | (int) 0x80);
 
         for ($i = 0; $i < $rsizw; $i++) {
             $t = unpack('v*', self::ourSubstr($temp, $i * 8, 8));
